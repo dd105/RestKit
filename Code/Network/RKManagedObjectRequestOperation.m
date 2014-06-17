@@ -834,8 +834,12 @@ BOOL RKDoesArrayOfResponseDescriptorsContainOnlyEntityMappings(NSArray *response
             self.willSaveMappingContextBlock(self.privateContext);
         }];
     }
-    
-    if ([self.privateContext hasChanges]) {
+
+    __block BOOL hasChanges = NO;
+    [self.privateContext performBlockAndWait:^{
+        hasChanges = [self.privateContext hasChanges];
+    }];
+    if (hasChanges) {
         return [self saveContext:self.privateContext error:error];
     } else if ([self.targetObject isKindOfClass:[NSManagedObject class]]) {
         NSManagedObjectContext *context = [(NSManagedObject *)self.targetObject managedObjectContext];
